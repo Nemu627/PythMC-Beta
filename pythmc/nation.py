@@ -2,8 +2,8 @@ from __future__ import annotations
 from typing import Set, Tuple
 
 from . import get
-from .town import Town
-from .resident import Resident
+from .nova import Nation, Town, Resident
+from .aurora import Nation, Town, Resident
 
 
 class BaseNation:
@@ -17,7 +17,7 @@ class BaseNation:
 
     def __init__(self, name: str, *, data: Tuple[dict, dict] = None):
         if data is None:
-            data = get.self.get_data()
+            data = self.get_data()
         towns = [town for town in data[0] if data[0][town]["desc"][0][:-1].split(" (")[-1] == name]
         if len(towns) <= 0 or name == "":
             raise NationNotFoundException(f"The nation {name} was not found")
@@ -30,9 +30,9 @@ class BaseNation:
         self.area = sum(town.area for town in self.towns)
 
     @classmethod
-    def all(cls, *, data: Tuple[dict, dict] = None) -> Set[BaseNation]:
+    def all(self, cls, *, data: Tuple[dict, dict] = None) -> Set[Nation]:
         if data is None:
-            data = get.self.get_data()
+            data = self.get_data()
         return {cls(nation, data=data) for nation in {data[0][town]["desc"][0][:-1].split(" (")[-1] for town in data[0]} if nation != ""}
 
     def __str__(self) -> str:
@@ -48,6 +48,9 @@ class BaseNation:
             f"Citizens: {','.join([citizen.name for citizen in self.citizens])}\n"
             f"Area: {self.area}\n"
         )
+
+    def get_data(self):
+        get.get_data()
 
 class NationNotFoundException(Exception):
     pass
